@@ -181,192 +181,84 @@ export default function FormPage() {
   }
 
   const downloadPDF = () => {
-    if (!formRef.current) return
+    if (!formRef.current) {
+      alert('لم يتم العثور على النموذج')
+      return
+    }
 
-    // التحقق من تحميل المكتبة
     const checkAndDownload = () => {
       if (window.html2pdf) {
         const formElement = formRef.current
-        if (formElement) {
-          // الحصول على container الذي يحتوي على border
-          const container = formElement.closest('.container')
-          if (!container) return
+        if (!formElement) return
+        const container = formElement.closest('.container') as HTMLElement
+        if (!container) return
 
-          // إخفاء الأزرار قبل التصدير (الأزرار الآن خارج الـ container)
-          const actionsDiv = container.querySelector('.actions')
-          let actionsDisplay = ''
-          if (actionsDiv) {
-            actionsDisplay = (actionsDiv as HTMLElement).style.display
-            ;(actionsDiv as HTMLElement).style.display = 'none'
+        // إخفاء الأزرار مؤقتاً
+        const actionsDiv = document.querySelector('.actions') as HTMLElement
+        const oldDisplay = actionsDiv ? actionsDiv.style.display : ''
+        if (actionsDiv) actionsDiv.style.display = 'none'
+
+        // تحضير العناصر: تحويل القيم إلى نص ثابت ليراها html2canvas بوضوح
+        const inputs = container.querySelectorAll('input, textarea, select')
+        inputs.forEach((input: any) => {
+          if (input.type === 'checkbox' || input.type === 'radio') {
+            if (input.checked) {
+              input.setAttribute('checked', 'checked')
+            } else {
+              input.removeAttribute('checked')
+            }
+          } else {
+            input.setAttribute('value', input.value)
+            if (input.tagName.toLowerCase() === 'textarea') {
+              input.innerHTML = input.value
+            }
           }
+        })
 
-          // الانتظار قليلاً لضمان تحميل جميع العناصر
-          setTimeout(() => {
-            // التأكد من أن جميع العناصر مرئية
-            const allElements = container.querySelectorAll('*')
-            allElements.forEach((el: any) => {
-              if (el.style && !el.classList.contains('actions')) {
-                el.style.visibility = 'visible'
-                el.style.opacity = '1'
-              }
-            })
-
-            // الانتظار حتى يتم تحميل جميع الصور والخطوط
-            window.scrollTo(0, 0)
-            
-            // الحصول على الأبعاد الصحيحة للـ container
-            setTimeout(() => {
-              // الانتظار قليلاً لضمان حساب الأبعاد بشكل صحيح
-              const rect = (container as HTMLElement).getBoundingClientRect()
+        const opt = {
+          margin: [0.3, 0.3, 0.3, 0.3],
+          filename: `report-${formData.report_no || 'report'}.pdf`,
+          image: { type: 'jpeg', quality: 1.0 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            width: 1200,
+            windowWidth: 1200,
+            onclone: (clonedDoc: Document) => {
+              const clonedActions = clonedDoc.querySelector('.actions')
+              if (clonedActions) (clonedActions as HTMLElement).style.display = 'none'
               
-              // استخدام الأبعاد الفعلية للـ container
-              const fullHeight = Math.max(
-                (container as HTMLElement).scrollHeight,
-                (container as HTMLElement).offsetHeight,
-                (container as HTMLElement).clientHeight,
-                rect.height
-              )
-              const fullWidth = Math.max(
-                (container as HTMLElement).scrollWidth,
-                (container as HTMLElement).offsetWidth,
-                (container as HTMLElement).clientWidth,
-                rect.width,
-                1200
-              )
-
-              console.log('Container dimensions:', { fullWidth, fullHeight, rect })
-
-              const opt = {
-                margin: [0, 0, 0, 0],
-                filename: `report-${formData.report_no || reportId || 'new'}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                  scale: 3, // زيادة scale لضمان الجودة
-                  useCORS: true,
-                  logging: true, // تفعيل logging للتشخيص
-                  letterRendering: true,
-                  allowTaint: false,
-                  backgroundColor: '#ffffff',
-                  width: fullWidth,
-                  height: fullHeight,
-                  windowWidth: fullWidth,
-                  windowHeight: fullHeight,
-                  scrollX: 0,
-                  scrollY: 0,
-                  x: 0,
-                  y: 0,
-                  removeContainer: false,
-                  foreignObjectRendering: true, // تحسين عرض العناصر
-                  onclone: (clonedDoc: Document) => {
-                    // إخفاء الأزرار في النسخة المستنسخة
-                    const clonedActions = clonedDoc.querySelector('.actions')
-                    if (clonedActions) {
-                      (clonedActions as HTMLElement).style.display = 'none'
-                    }
-                    
-                    // التأكد من أن container مرئي بالكامل مع جميع الـ styles
-                    const clonedContainer = clonedDoc.querySelector('.container') as HTMLElement
-                    if (clonedContainer && clonedContainer.style) {
-                      clonedContainer.style.visibility = 'visible'
-                      clonedContainer.style.opacity = '1'
-                      clonedContainer.style.display = 'block'
-                      clonedContainer.style.overflow = 'visible'
-                      clonedContainer.style.position = 'relative'
-                      clonedContainer.style.width = '100%'
-                      clonedContainer.style.maxWidth = '1200px'
-                      clonedContainer.style.margin = '0 auto'
-                      clonedContainer.style.padding = '30px'
-                      clonedContainer.style.backgroundColor = '#ffffff'
-                      clonedContainer.style.border = '2px solid #20B2AA'
-                      clonedContainer.style.borderRadius = '4px'
-                      clonedContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                    }
-                    
-                    // تطبيق جميع الـ styles على جميع العناصر
-                    const clonedElements = clonedDoc.querySelectorAll('*')
-                    clonedElements.forEach((el: any) => {
-                      if (el && !el.classList.contains('actions')) {
-                        // التأكد من أن العنصر مرئي
-                        if (el.style) {
-                          if (el.style.visibility === 'hidden') {
-                            el.style.visibility = 'visible'
-                          }
-                          if (el.style.opacity === '0') {
-                            el.style.opacity = '1'
-                          }
-                          if (el.style.display === 'none' && !el.classList.contains('actions')) {
-                            el.style.display = ''
-                          }
-                        }
-                        
-                        // الحفاظ على الـ computed styles
-                        const computedStyle = window.getComputedStyle(el)
-                        if (computedStyle) {
-                          // تطبيق الألوان
-                          if (computedStyle.color) {
-                            el.style.color = computedStyle.color
-                          }
-                          if (computedStyle.backgroundColor) {
-                            el.style.backgroundColor = computedStyle.backgroundColor
-                          }
-                          if (computedStyle.borderColor) {
-                            el.style.borderColor = computedStyle.borderColor
-                          }
-                          // تطبيق الـ borders
-                          if (computedStyle.border) {
-                            el.style.border = computedStyle.border
-                          }
-                          if (computedStyle.borderWidth) {
-                            el.style.borderWidth = computedStyle.borderWidth
-                          }
-                          if (computedStyle.borderStyle) {
-                            el.style.borderStyle = computedStyle.borderStyle
-                          }
-                          // تطبيق الـ padding و margin
-                          if (computedStyle.padding) {
-                            el.style.padding = computedStyle.padding
-                          }
-                          if (computedStyle.margin) {
-                            el.style.margin = computedStyle.margin
-                          }
-                        }
-                      }
-                    })
-                  }
-                },
-                jsPDF: { 
-                  unit: 'in', 
-                  format: 'a4', 
-                  orientation: 'portrait',
-                  compress: true
-                },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+              const clonedContainer = clonedDoc.querySelector('.container') as HTMLElement
+              if (clonedContainer) {
+                clonedContainer.style.margin = '0'
+                clonedContainer.style.boxShadow = 'none'
+                clonedContainer.style.width = '1200px'
+                clonedContainer.style.padding = '30px'
+                clonedContainer.style.border = '2px solid #20B2AA'
               }
-              
-              window.html2pdf()
-                .set(opt)
-                .from(container as HTMLElement)
-                .save()
-                .then(() => {
-                  // إظهار الأزرار مرة أخرى
-                  if (actionsDiv) {
-                    ;(actionsDiv as HTMLElement).style.display = actionsDisplay || ''
-                  }
-                })
-                .catch((error: any) => {
-                  console.error('Error generating PDF:', error)
-                  // إظهار الأزرار مرة أخرى حتى في حالة الخطأ
-                  if (actionsDiv) {
-                    ;(actionsDiv as HTMLElement).style.display = actionsDisplay || ''
-                  }
-                  alert('حدث خطأ أثناء إنشاء PDF. يرجى المحاولة مرة أخرى.')
-                })
-            }, 300)
-          }, 500)
+            }
+          },
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         }
+
+        setTimeout(() => {
+          window.html2pdf()
+            .set(opt)
+            .from(container)
+            .save()
+            .then(() => {
+              if (actionsDiv) actionsDiv.style.display = oldDisplay
+            })
+            .catch((err: any) => {
+              console.error('PDF Error:', err)
+              if (actionsDiv) actionsDiv.style.display = oldDisplay
+            })
+        }, 100)
       } else {
-        // إذا لم تكن المكتبة محملة، ننتظر قليلاً ثم نحاول مرة أخرى
-        setTimeout(checkAndDownload, 100)
+        setTimeout(checkAndDownload, 200)
       }
     }
 
