@@ -193,40 +193,70 @@ export default function FormPage() {
         const container = formElement.closest('.container') as HTMLElement
         if (!container) return
 
-        // إخفاء الأزرار مؤقتاً
-        const actionsDiv = document.querySelector('.actions') as HTMLElement
-        const oldDisplay = actionsDiv ? actionsDiv.style.display : ''
-        if (actionsDiv) actionsDiv.style.display = 'none'
+        // 1. إخفاء الأزرار تماماً
+        const actionsDiv = document.querySelector('.actions') as HTMLElement;
+        const oldDisplay = actionsDiv ? actionsDiv.style.display : '';
+        if (actionsDiv) actionsDiv.style.display = 'none';
 
-        // تحضير العناصر: تحويل القيم إلى نص ثابت ليراها html2canvas بوضوح
-        const inputs = container.querySelectorAll('input, textarea, select')
+        // 2. تحويل كل القيم إلى نصوص ثابتة لضمان الظهور في الـ PDF
+        const inputs = container.querySelectorAll('input, textarea, select');
+        const tempSpans: { parent: HTMLElement, span: HTMLElement, input: HTMLElement }[] = [];
+
         inputs.forEach((input: any) => {
-          if (input.type === 'checkbox' || input.type === 'radio') {
-            if (input.checked) {
-              input.setAttribute('checked', 'checked')
+          const parent = input.parentElement;
+          if (parent) {
+            const span = document.createElement('span');
+            span.className = 'print-temp-value';
+            
+            if (input.type === 'checkbox' || input.type === 'radio') {
+              // للحفاظ على شكل الراديو والتشيك بوكس
+              span.innerHTML = input.checked ? '☑' : '☐';
+              span.style.fontSize = '18px';
+              span.style.color = '#20B2AA';
             } else {
-              input.removeAttribute('checked')
+              span.textContent = input.value || ' ';
+              span.style.display = 'inline-block';
+              span.style.minWidth = '20px';
+              span.style.minHeight = '20px';
+              span.style.color = '#333';
+              span.style.fontSize = 'inherit';
+              span.style.fontFamily = 'inherit';
+              
+              // إذا كان حقل الهيدر (رقم، تاريخ، وقت)
+              if (input.classList.contains('header-input')) {
+                span.style.backgroundColor = '#f0f9f8';
+                span.style.border = '1px solid #b0e0e0';
+                span.style.borderRadius = '6px';
+                span.style.padding = '10px 12px';
+                span.style.width = '100%';
+              }
             }
-          } else {
-            input.setAttribute('value', input.value)
-            if (input.tagName.toLowerCase() === 'textarea') {
-              input.innerHTML = input.value
-            }
+            
+            // إخفاء الحقل الأصلي وإضافة النص مكانه مؤقتاً
+            input.style.display = 'none';
+            parent.appendChild(span);
+            tempSpans.push({ parent, span, input });
           }
-        })
+        });
 
         const opt = {
           margin: [0.3, 0.3, 0.3, 0.3],
           filename: `report-${formData.report_no || 'report'}.pdf`,
           image: { type: 'jpeg', quality: 1.0 },
           html2canvas: { 
-            scale: 2,
+            scale: 3, // جودة عالية
             useCORS: true,
             letterRendering: true,
             backgroundColor: '#ffffff',
             width: 1200,
             windowWidth: 1200,
             onclone: (clonedDoc: Document) => {
+              // إخفاء جميع الأزرار في النسخة المستنسخة
+              const buttons = clonedDoc.querySelectorAll('button');
+              buttons.forEach((btn: any) => {
+                btn.style.display = 'none';
+              });
+
               const clonedActions = clonedDoc.querySelector('.actions')
               if (clonedActions) (clonedActions as HTMLElement).style.display = 'none'
               
@@ -238,6 +268,16 @@ export default function FormPage() {
                 clonedContainer.style.padding = '30px'
                 clonedContainer.style.border = '2px solid #20B2AA'
               }
+
+              // التأكد من تطبيق ألوان العناوين
+              const sectionTitles = clonedDoc.querySelectorAll('.section-title');
+              sectionTitles.forEach((title: any) => {
+                title.style.backgroundColor = '#20B2AA';
+                title.style.color = 'white';
+                title.style.padding = '10px 15px';
+                title.style.fontWeight = 'bold';
+                title.style.display = 'block';
+              });
             }
           },
           jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
@@ -250,13 +290,22 @@ export default function FormPage() {
             .from(container)
             .save()
             .then(() => {
+              // إعادة الصفحة لحالتها الأصلية
+              tempSpans.forEach(({ parent, span, input }) => {
+                parent.removeChild(span);
+                input.style.display = '';
+              });
               if (actionsDiv) actionsDiv.style.display = oldDisplay
             })
             .catch((err: any) => {
               console.error('PDF Error:', err)
+              tempSpans.forEach(({ parent, span, input }) => {
+                parent.removeChild(span);
+                input.style.display = '';
+              });
               if (actionsDiv) actionsDiv.style.display = oldDisplay
             })
-        }, 100)
+        }, 500)
       } else {
         setTimeout(checkAndDownload, 200)
       }
