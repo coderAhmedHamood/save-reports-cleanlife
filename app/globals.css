@@ -673,3 +673,16 @@ body {
   background-color: #17A2B8;
 }
 
+/* تحسين container للطباعة في PDF */
+.container {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+}
+
+.container * {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+}
+

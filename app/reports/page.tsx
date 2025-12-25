@@ -54,10 +54,26 @@ export default function ReportsPage() {
     try {
       const response = await fetch('/api/reports')
       if (response.ok) {
-        const data = await response.json()
-        setReports(data)
+        const text = await response.text()
+        if (!text) {
+          setReports([])
+          return
+        }
+        try {
+          const data = JSON.parse(text)
+          setReports(Array.isArray(data) ? data : [])
+        } catch (parseError) {
+          console.error('Error parsing JSON:', parseError)
+          setReports([])
+        }
       } else {
-        const errorData = await response.json()
+        const text = await response.text()
+        let errorData
+        try {
+          errorData = text ? JSON.parse(text) : { message: 'خطأ غير معروف' }
+        } catch {
+          errorData = { message: text || 'خطأ غير معروف' }
+        }
         console.error('Error fetching reports:', errorData)
         alert(`خطأ في جلب التقارير: ${errorData.message || 'خطأ غير معروف'}`)
       }

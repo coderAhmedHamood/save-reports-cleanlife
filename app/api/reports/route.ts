@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import pool from '@/lib/db'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const result = await pool.query(`
       SELECT sr.*, 
@@ -25,7 +25,7 @@ export async function GET() {
       ORDER BY sr.created_at DESC
     `)
 
-    return NextResponse.json(result.rows)
+    return NextResponse.json(result.rows || [], { status: 200 })
   } catch (error: any) {
     console.error('Error fetching reports:', error)
     console.error('Error details:', {

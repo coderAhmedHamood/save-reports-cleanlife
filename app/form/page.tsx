@@ -216,27 +216,34 @@ export default function FormPage() {
             
             // الحصول على الأبعاد الصحيحة للـ container
             setTimeout(() => {
+              // الانتظار قليلاً لضمان حساب الأبعاد بشكل صحيح
               const rect = (container as HTMLElement).getBoundingClientRect()
+              
+              // استخدام الأبعاد الفعلية للـ container
               const fullHeight = Math.max(
                 (container as HTMLElement).scrollHeight,
                 (container as HTMLElement).offsetHeight,
+                (container as HTMLElement).clientHeight,
                 rect.height
               )
               const fullWidth = Math.max(
                 (container as HTMLElement).scrollWidth,
                 (container as HTMLElement).offsetWidth,
+                (container as HTMLElement).clientWidth,
                 rect.width,
                 1200
               )
 
+              console.log('Container dimensions:', { fullWidth, fullHeight, rect })
+
               const opt = {
-                margin: [0.1, 0.1, 0.1, 0.1],
+                margin: [0, 0, 0, 0],
                 filename: `report-${formData.report_no || reportId || 'new'}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
-                  scale: 2,
+                  scale: 3, // زيادة scale لضمان الجودة
                   useCORS: true,
-                  logging: false,
+                  logging: true, // تفعيل logging للتشخيص
                   letterRendering: true,
                   allowTaint: false,
                   backgroundColor: '#ffffff',
@@ -249,20 +256,80 @@ export default function FormPage() {
                   x: 0,
                   y: 0,
                   removeContainer: false,
-                  onclone: (clonedDoc: any) => {
+                  foreignObjectRendering: true, // تحسين عرض العناصر
+                  onclone: (clonedDoc: Document) => {
                     // إخفاء الأزرار في النسخة المستنسخة
                     const clonedActions = clonedDoc.querySelector('.actions')
                     if (clonedActions) {
                       (clonedActions as HTMLElement).style.display = 'none'
                     }
                     
-                    // التأكد من أن جميع العناصر مرئية في النسخة المستنسخة
+                    // التأكد من أن container مرئي بالكامل مع جميع الـ styles
+                    const clonedContainer = clonedDoc.querySelector('.container') as HTMLElement
+                    if (clonedContainer && clonedContainer.style) {
+                      clonedContainer.style.visibility = 'visible'
+                      clonedContainer.style.opacity = '1'
+                      clonedContainer.style.display = 'block'
+                      clonedContainer.style.overflow = 'visible'
+                      clonedContainer.style.position = 'relative'
+                      clonedContainer.style.width = '100%'
+                      clonedContainer.style.maxWidth = '1200px'
+                      clonedContainer.style.margin = '0 auto'
+                      clonedContainer.style.padding = '30px'
+                      clonedContainer.style.backgroundColor = '#ffffff'
+                      clonedContainer.style.border = '2px solid #20B2AA'
+                      clonedContainer.style.borderRadius = '4px'
+                      clonedContainer.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+                    }
+                    
+                    // تطبيق جميع الـ styles على جميع العناصر
                     const clonedElements = clonedDoc.querySelectorAll('*')
                     clonedElements.forEach((el: any) => {
-                      if (el.style && !el.classList.contains('actions')) {
-                        el.style.visibility = 'visible'
-                        el.style.opacity = '1'
-                        el.style.display = ''
+                      if (el && !el.classList.contains('actions')) {
+                        // التأكد من أن العنصر مرئي
+                        if (el.style) {
+                          if (el.style.visibility === 'hidden') {
+                            el.style.visibility = 'visible'
+                          }
+                          if (el.style.opacity === '0') {
+                            el.style.opacity = '1'
+                          }
+                          if (el.style.display === 'none' && !el.classList.contains('actions')) {
+                            el.style.display = ''
+                          }
+                        }
+                        
+                        // الحفاظ على الـ computed styles
+                        const computedStyle = window.getComputedStyle(el)
+                        if (computedStyle) {
+                          // تطبيق الألوان
+                          if (computedStyle.color) {
+                            el.style.color = computedStyle.color
+                          }
+                          if (computedStyle.backgroundColor) {
+                            el.style.backgroundColor = computedStyle.backgroundColor
+                          }
+                          if (computedStyle.borderColor) {
+                            el.style.borderColor = computedStyle.borderColor
+                          }
+                          // تطبيق الـ borders
+                          if (computedStyle.border) {
+                            el.style.border = computedStyle.border
+                          }
+                          if (computedStyle.borderWidth) {
+                            el.style.borderWidth = computedStyle.borderWidth
+                          }
+                          if (computedStyle.borderStyle) {
+                            el.style.borderStyle = computedStyle.borderStyle
+                          }
+                          // تطبيق الـ padding و margin
+                          if (computedStyle.padding) {
+                            el.style.padding = computedStyle.padding
+                          }
+                          if (computedStyle.margin) {
+                            el.style.margin = computedStyle.margin
+                          }
+                        }
                       }
                     })
                   }
