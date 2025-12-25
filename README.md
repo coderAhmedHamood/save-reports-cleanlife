@@ -27,11 +27,7 @@ npm install
 npm run db:create
 ```
 
-أو يدوياً:
-```bash
-psql -U postgres -c "CREATE DATABASE \"pipefy-main\";"
-```
-
+ 
 ### 3. إعداد متغيرات البيئة / Environment Variables
 
 **مهم جداً:** يجب إنشاء ملف `.env.local` في المجلد الرئيسي يدوياً:
