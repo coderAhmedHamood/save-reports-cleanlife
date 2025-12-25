@@ -1,7 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+
+// تعريف نوع html2pdf
+declare global {
+  interface Window {
+    html2pdf: any
+  }
+}
 
 interface PestDetail {
   id?: number
@@ -19,6 +26,7 @@ export default function FormPage() {
   const reportId = searchParams.get('id')
   const [loading, setLoading] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
   const [pestDetails, setPestDetails] = useState<PestDetail[]>([
     { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' },
     { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' },
@@ -52,6 +60,16 @@ export default function FormPage() {
     customer_signature_name: '',
     customer_signature: ''
   })
+
+  // تحميل html2pdf.js عند تحميل الصفحة
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.html2pdf) {
+      const script = document.createElement('script')
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
+      script.async = true
+      document.head.appendChild(script)
+    }
+  }, [])
 
   // جلب البيانات عند التعديل
   useEffect(() => {
@@ -162,10 +180,137 @@ export default function FormPage() {
     }
   }
 
+  const downloadPDF = () => {
+    if (!formRef.current) return
+
+    // التحقق من تحميل المكتبة
+    const checkAndDownload = () => {
+      if (window.html2pdf) {
+        const formElement = formRef.current
+        if (formElement) {
+          // الحصول على container الذي يحتوي على border
+          const container = formElement.closest('.container')
+          if (!container) return
+
+          // إخفاء الأزرار قبل التصدير (الأزرار الآن خارج الـ container)
+          const actionsDiv = container.querySelector('.actions')
+          let actionsDisplay = ''
+          if (actionsDiv) {
+            actionsDisplay = (actionsDiv as HTMLElement).style.display
+            ;(actionsDiv as HTMLElement).style.display = 'none'
+          }
+
+          // الانتظار قليلاً لضمان تحميل جميع العناصر
+          setTimeout(() => {
+            // التأكد من أن جميع العناصر مرئية
+            const allElements = container.querySelectorAll('*')
+            allElements.forEach((el: any) => {
+              if (el.style && !el.classList.contains('actions')) {
+                el.style.visibility = 'visible'
+                el.style.opacity = '1'
+              }
+            })
+
+            // الانتظار حتى يتم تحميل جميع الصور والخطوط
+            window.scrollTo(0, 0)
+            
+            // الحصول على الأبعاد الصحيحة للـ container
+            setTimeout(() => {
+              const rect = (container as HTMLElement).getBoundingClientRect()
+              const fullHeight = Math.max(
+                (container as HTMLElement).scrollHeight,
+                (container as HTMLElement).offsetHeight,
+                rect.height
+              )
+              const fullWidth = Math.max(
+                (container as HTMLElement).scrollWidth,
+                (container as HTMLElement).offsetWidth,
+                rect.width,
+                1200
+              )
+
+              const opt = {
+                margin: [0.1, 0.1, 0.1, 0.1],
+                filename: `report-${formData.report_no || reportId || 'new'}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                  scale: 2,
+                  useCORS: true,
+                  logging: false,
+                  letterRendering: true,
+                  allowTaint: false,
+                  backgroundColor: '#ffffff',
+                  width: fullWidth,
+                  height: fullHeight,
+                  windowWidth: fullWidth,
+                  windowHeight: fullHeight,
+                  scrollX: 0,
+                  scrollY: 0,
+                  x: 0,
+                  y: 0,
+                  removeContainer: false,
+                  onclone: (clonedDoc: any) => {
+                    // إخفاء الأزرار في النسخة المستنسخة
+                    const clonedActions = clonedDoc.querySelector('.actions')
+                    if (clonedActions) {
+                      (clonedActions as HTMLElement).style.display = 'none'
+                    }
+                    
+                    // التأكد من أن جميع العناصر مرئية في النسخة المستنسخة
+                    const clonedElements = clonedDoc.querySelectorAll('*')
+                    clonedElements.forEach((el: any) => {
+                      if (el.style && !el.classList.contains('actions')) {
+                        el.style.visibility = 'visible'
+                        el.style.opacity = '1'
+                        el.style.display = ''
+                      }
+                    })
+                  }
+                },
+                jsPDF: { 
+                  unit: 'in', 
+                  format: 'a4', 
+                  orientation: 'portrait',
+                  compress: true
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+              }
+              
+              window.html2pdf()
+                .set(opt)
+                .from(container as HTMLElement)
+                .save()
+                .then(() => {
+                  // إظهار الأزرار مرة أخرى
+                  if (actionsDiv) {
+                    ;(actionsDiv as HTMLElement).style.display = actionsDisplay || ''
+                  }
+                })
+                .catch((error: any) => {
+                  console.error('Error generating PDF:', error)
+                  // إظهار الأزرار مرة أخرى حتى في حالة الخطأ
+                  if (actionsDiv) {
+                    ;(actionsDiv as HTMLElement).style.display = actionsDisplay || ''
+                  }
+                  alert('حدث خطأ أثناء إنشاء PDF. يرجى المحاولة مرة أخرى.')
+                })
+            }, 300)
+          }, 500)
+        }
+      } else {
+        // إذا لم تكن المكتبة محملة، ننتظر قليلاً ثم نحاول مرة أخرى
+        setTimeout(checkAndDownload, 100)
+      }
+    }
+
+    checkAndDownload()
+  }
+
   return (
-    <div className="container">
-      <div className="report-header">
-        <div className="report-title-section">
+    <>
+      <div className="container" style={{ position: 'relative' }}>
+        <div className="report-header">
+          <div className="report-title-section">
           <h1 className="report-title">Service Report</h1>
           <div className="report-title-arabic">تقرير خدمة</div>
         </div>
@@ -180,7 +325,7 @@ export default function FormPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} ref={formRef}>
         {/* Header Fields - في صفين و عمودين */}
         <div className="header-fields-section">
           <div className="header-fields-grid">
@@ -607,21 +752,41 @@ export default function FormPage() {
             </div>
           </div>
         </div>
-
-          <div className="actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? (isEditMode ? 'جاري التحديث...' : 'جاري الحفظ...') : (isEditMode ? 'تحديث التقرير' : 'حفظ التقرير')}
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => router.push('/reports')}
-            >
-              إلغاء
-            </button>
-          </div>
       </form>
-    </div>
+      </div>
+      
+      <div className="actions" style={{ maxWidth: '1200px', margin: '20px auto', padding: '0 20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <button 
+          type="button" 
+          className="btn btn-primary" 
+          disabled={loading}
+          onClick={() => {
+            const form = formRef.current
+            if (form) {
+              form.requestSubmit()
+            }
+          }}
+        >
+          {loading ? (isEditMode ? 'جاري التحديث...' : 'جاري الحفظ...') : (isEditMode ? 'تحديث التقرير' : 'حفظ التقرير')}
+        </button>
+        {isEditMode && (
+          <button
+            type="button"
+            className="btn btn-success"
+            onClick={downloadPDF}
+          >
+            تحميل PDF
+          </button>
+        )}
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => router.push('/reports')}
+        >
+          إلغاء
+        </button>
+      </div>
+    </>
   )
 }
 
