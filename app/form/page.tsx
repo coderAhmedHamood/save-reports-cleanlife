@@ -252,10 +252,14 @@ export default function FormPage() {
 
         {/* Pest Details Table */}
         <div className="form-section">
-          <div className="section-title">Customer's Information - معلومات العميل</div>
-          <div style={{ padding: '20px' }}>
+          <div style={{ padding: '0' }}>
             <table className="dynamic-table">
               <thead>
+                <tr>
+                  <th colSpan={6} className="table-main-title">
+                    Customer's Information - معلومات العميل
+                  </th>
+                </tr>
                 <tr>
                   <th>الآفات Pests</th>
                   <th>
@@ -322,7 +326,7 @@ export default function FormPage() {
                 ))}
               </tbody>
             </table>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px', padding: '0 20px 20px 20px' }}>
               <button
                 type="button"
                 className="btn btn-secondary"
