@@ -122,18 +122,29 @@ body {
 
 .header-field {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
 }
 
 .header-field label {
   font-size: 14px;
   font-weight: 500;
-  color: #1a5f5a;
+  color: #333;
   margin: 0;
+  width: 140px;
+  text-align: right;
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border: 1px solid #b0e0e0;
+  border-radius: 6px;
+  background-color: #f0f9f8;
+  transition: all 0.3s;
 }
 
 .header-input {
+  flex: 1;
+  width: 100%;
   padding: 10px 12px;
   border: 1px solid #b0e0e0;
   border-radius: 6px;
@@ -141,6 +152,7 @@ body {
   font-size: 14px;
   color: #333;
   transition: all 0.3s;
+  box-sizing: border-box;
 }
 
 .header-input:focus {
