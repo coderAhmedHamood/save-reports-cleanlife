@@ -17,6 +17,144 @@ body {
   padding: 20px;
 }
 
+/* Report Header - مطابق للصورة */
+.report-header {
+  background: #ffffff;
+  padding: 25px 20px;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.report-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.report-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1a5f5a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.report-title-arabic {
+  font-size: 20px;
+  font-weight: 500;
+  color: #1a5f5a;
+  position: relative;
+  padding-bottom: 5px;
+}
+
+.report-title-arabic::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 200px;
+  height: 1px;
+  background-color: #1a5f5a;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-circle {
+  width: 50px;
+  height: 50px;
+  background: #20B2AA;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 28px;
+  box-shadow: 0 2px 6px rgba(32, 178, 170, 0.3);
+}
+
+.logo-letter {
+  font-family: 'Arial', sans-serif;
+}
+
+.logo-text-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logo-text-arabic {
+  font-size: 18px;
+  font-weight: bold;
+  color: #20B2AA;
+  line-height: 1.2;
+}
+
+.logo-text-english {
+  font-size: 14px;
+  font-weight: 500;
+  color: #20B2AA;
+  line-height: 1.2;
+}
+
+/* Header Fields Section */
+.header-fields-section {
+  background: #ffffff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.header-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
+}
+
+.header-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a5f5a;
+  margin: 0;
+}
+
+.header-input {
+  padding: 10px 12px;
+  border: 1px solid #b0e0e0;
+  border-radius: 6px;
+  background-color: #f0f9f8;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.3s;
+}
+
+.header-input:focus {
+  outline: none;
+  border-color: #20B2AA;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+}
+
+.header-input::placeholder {
+  color: #999;
+}
+
+/* Legacy header styles for other pages */
 .header {
   background: #ffffff;
   color: #333;
@@ -92,59 +230,85 @@ body {
   font-size: 14px;
 }
 
-.form-group-inline {
+/* Customer Information Section - مطابق للصورة الأصلية */
+.customer-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 20px;
+}
+
+.customer-details-column {
+  padding-right: 25px;
+  border-right: 1px solid #d0d0d0;
+}
+
+.treatment-type-column {
+  padding-left: 25px;
+}
+
+.form-field-line {
   display: flex;
   align-items: flex-start;
   gap: 15px;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.form-group-inline label {
-  min-width: 220px;
+.form-field-line label {
+  min-width: 200px;
   font-weight: 500;
   color: #333;
   font-size: 14px;
   margin: 0;
   text-align: right;
-  padding-top: 5px;
+  padding-top: 4px;
 }
 
-.inline-input {
+.input-line {
   flex: 1;
-  border: none;
-  border-bottom: 1px solid #ccc;
-  padding: 5px 0;
-  background: transparent;
-  border-radius: 0;
-  font-size: 14px;
+  min-width: 0;
 }
 
-.inline-input:focus {
+.input-line input,
+.input-line textarea {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #d0d0d0;
+  padding: 4px 0;
+  background: transparent;
+  font-size: 14px;
+  color: #333;
+  font-family: inherit;
+}
+
+.input-line input:focus,
+.input-line textarea:focus {
   outline: none;
   border-bottom-color: #20B2AA;
   border-bottom-width: 2px;
 }
 
-.form-group-inline textarea.inline-input {
-  border: 1px solid #ccc;
+.input-line textarea {
+  border: 1px solid #d0d0d0;
   border-radius: 3px;
   padding: 8px;
   min-height: 60px;
   resize: vertical;
 }
 
-.form-group-inline textarea.inline-input:focus {
+.input-line textarea:focus {
   border-color: #20B2AA;
   border-width: 1px;
 }
 
-.treatment-type-label {
+/* Treatment Type Section */
+.treatment-type-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   font-weight: bold;
   color: #333;
   font-size: 14px;
@@ -152,36 +316,36 @@ body {
 
 .diamond-icon {
   color: #20B2AA;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: normal;
 }
 
-.radio-group-vertical {
+.treatment-options {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.radio-option-box {
+.treatment-option {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  background-color: #fafafa;
 }
 
-.radio-option-box input[type="radio"] {
+.treatment-option input[type="radio"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
   accent-color: #20B2AA;
+  margin: 0;
 }
 
-.radio-option-box label {
+.treatment-option label {
   cursor: pointer;
   margin: 0;
   font-size: 14px;
+  color: #333;
+  font-weight: normal;
 }
 
 .form-section {
@@ -283,14 +447,35 @@ body {
   padding: 10px 8px;
   border: 1px solid #e0e0e0;
   text-align: right;
+  background-color: #fff;
+}
+
+.dynamic-table th {
+  background-color: #20B2AA;
+  color: white;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.dynamic-table th .diamond-icon {
+  color: white;
+  margin-left: 5px;
 }
 
 .dynamic-table td {
   background-color: #fff;
 }
 
+.dynamic-table tbody tr {
+  border-bottom: 1px solid #e8e8e8;
+}
+
 .dynamic-table tbody tr:hover {
   background-color: #f9f9f9;
+}
+
+.dynamic-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .dynamic-table th {
@@ -308,16 +493,22 @@ body {
 .dynamic-table input,
 .dynamic-table select {
   width: 100%;
-  padding: 6px 8px;
+  padding: 6px 4px;
   border: none;
   background-color: transparent;
   font-size: 14px;
+  color: #333;
 }
 
 .dynamic-table input:focus,
 .dynamic-table select:focus {
   outline: none;
   background-color: #f0f9f8;
+  border-radius: 2px;
+}
+
+.dynamic-table select {
+  cursor: pointer;
 }
 
 .btn {

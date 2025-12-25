@@ -16,6 +16,10 @@ export default function FormPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [pestDetails, setPestDetails] = useState<PestDetail[]>([
+    { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' },
+    { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' },
+    { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' },
+    { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' },
     { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' }
   ])
 
@@ -94,55 +98,64 @@ export default function FormPage() {
 
   return (
     <div className="container">
-      <div className="header">
-        <h1>Service Report - تقرير خدمة</h1>
-        <div className="logo">
-          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>C</div>
-          <div>
-            <div style={{ fontWeight: 'bold' }}>كلين لايف</div>
-            <div style={{ fontSize: '12px' }}>CleanLife</div>
+      <div className="report-header">
+        <div className="report-title-section">
+          <h1 className="report-title">Service Report</h1>
+          <div className="report-title-arabic">تقرير خدمة</div>
+        </div>
+        <div className="logo-section">
+          <div className="logo-circle">
+            <span className="logo-letter">C</span>
+          </div>
+          <div className="logo-text-section">
+            <div className="logo-text-arabic">كلين لايف</div>
+            <div className="logo-text-english">CleanLife</div>
           </div>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
-        {/* Header Fields - في صف واحد */}
-        <div className="form-section header-fields">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '15px', padding: '20px' }}>
-            <div className="form-group">
+        {/* Header Fields - في صفين و عمودين */}
+        <div className="header-fields-section">
+          <div className="header-fields-grid">
+            <div className="header-field">
               <label>رقم No</label>
               <input
                 type="text"
                 value={formData.report_no}
                 onChange={(e) => setFormData({ ...formData, report_no: e.target.value })}
                 required
+                className="header-input"
               />
             </div>
-            <div className="form-group">
-              <label>التاريخ Date</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
+            <div className="header-field">
               <label>وقت البداية Time in</label>
               <input
                 type="time"
                 value={formData.time_in}
                 onChange={(e) => setFormData({ ...formData, time_in: e.target.value })}
                 required
+                className="header-input"
               />
             </div>
-            <div className="form-group">
+            <div className="header-field">
+              <label>التاريخ Date</label>
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                required
+                className="header-input"
+              />
+            </div>
+            <div className="header-field">
               <label>وقت النهاية Time out</label>
               <input
                 type="time"
                 value={formData.time_out}
                 onChange={(e) => setFormData({ ...formData, time_out: e.target.value })}
                 required
+                className="header-input"
               />
             </div>
           </div>
@@ -151,84 +164,86 @@ export default function FormPage() {
         {/* Customer Information */}
         <div className="form-section">
           <div className="section-title">Customer's Information - معلومات العميل</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', padding: '20px' }}>
-            <div style={{ paddingRight: '20px', borderRight: '1px solid #e0e0e0' }}>
-              <div className="form-group-inline">
+          <div className="customer-info-grid">
+            <div className="customer-details-column">
+              <div className="form-field-line">
                 <label>Name الاسم:</label>
-                <input
-                  type="text"
-                  value={formData.customer_name}
-                  onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                  required
-                  className="inline-input"
-                />
+                <div className="input-line">
+                  <input
+                    type="text"
+                    value={formData.customer_name}
+                    onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
-              <div className="form-group-inline">
+              <div className="form-field-line">
                 <label>Address العنوان:</label>
-                <input
-                  type="text"
-                  value={formData.customer_address}
-                  onChange={(e) => setFormData({ ...formData, customer_address: e.target.value })}
-                  required
-                  className="inline-input"
-                />
+                <div className="input-line">
+                  <input
+                    type="text"
+                    value={formData.customer_address}
+                    onChange={(e) => setFormData({ ...formData, customer_address: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
-              <div className="form-group-inline">
-                <label>Contract العقد / Job No رقم العميل:</label>
-                <input
-                  type="text"
-                  value={formData.job_no_contract}
-                  onChange={(e) => setFormData({ ...formData, job_no_contract: e.target.value })}
-                  className="inline-input"
-                />
+              <div className="form-field-line">
+                <label>Job No / Contract رقم العميل / العقد:</label>
+                <div className="input-line">
+                  <input
+                    type="text"
+                    value={formData.job_no_contract}
+                    onChange={(e) => setFormData({ ...formData, job_no_contract: e.target.value })}
+                  />
+                </div>
               </div>
-              <div className="form-group-inline">
+              <div className="form-field-line">
                 <label>Treated Areas مناطق المعالجة:</label>
-                <textarea
-                  value={formData.treated_areas}
-                  onChange={(e) => setFormData({ ...formData, treated_areas: e.target.value })}
-                  rows={3}
-                  className="inline-input"
-                />
+                <div className="input-line">
+                  <textarea
+                    value={formData.treated_areas}
+                    onChange={(e) => setFormData({ ...formData, treated_areas: e.target.value })}
+                    rows={3}
+                  />
+                </div>
               </div>
             </div>
-            <div style={{ paddingLeft: '20px' }}>
-              <div className="form-group">
-                <label className="treatment-type-label">
-                  <span className="diamond-icon">◆</span>
-                  Treatment Type نوع المعالجة
-                </label>
-                <div className="radio-group-vertical">
-                  <div className="radio-option-box">
-                    <input
-                      type="radio"
-                      name="treatment_type"
-                      value="Routine"
-                      checked={formData.treatment_type === 'Routine'}
-                      onChange={(e) => setFormData({ ...formData, treatment_type: e.target.value })}
-                    />
-                    <label>Routine دوري</label>
-                  </div>
-                  <div className="radio-option-box">
-                    <input
-                      type="radio"
-                      name="treatment_type"
-                      value="Follow-Up"
-                      checked={formData.treatment_type === 'Follow-Up'}
-                      onChange={(e) => setFormData({ ...formData, treatment_type: e.target.value })}
-                    />
-                    <label>Follow-Up مراجعة</label>
-                  </div>
-                  <div className="radio-option-box">
-                    <input
-                      type="radio"
-                      name="treatment_type"
-                      value="Call-Out"
-                      checked={formData.treatment_type === 'Call-Out'}
-                      onChange={(e) => setFormData({ ...formData, treatment_type: e.target.value })}
-                    />
-                    <label>Call-Out مكالمة صادرة</label>
-                  </div>
+            <div className="treatment-type-column">
+              <div className="treatment-type-header">
+                <span className="diamond-icon">◆</span>
+                <span>Treatment Type نوع المعالجة</span>
+              </div>
+              <div className="treatment-options">
+                <div className="treatment-option">
+                  <input
+                    type="radio"
+                    name="treatment_type"
+                    value="Routine"
+                    checked={formData.treatment_type === 'Routine'}
+                    onChange={(e) => setFormData({ ...formData, treatment_type: e.target.value })}
+                  />
+                  <label>Routine دوري</label>
+                </div>
+                <div className="treatment-option">
+                  <input
+                    type="radio"
+                    name="treatment_type"
+                    value="Follow-Up"
+                    checked={formData.treatment_type === 'Follow-Up'}
+                    onChange={(e) => setFormData({ ...formData, treatment_type: e.target.value })}
+                  />
+                  <label>Follow-Up مراجعة</label>
+                </div>
+                <div className="treatment-option">
+                  <input
+                    type="radio"
+                    name="treatment_type"
+                    value="Call-Out"
+                    checked={formData.treatment_type === 'Call-Out'}
+                    onChange={(e) => setFormData({ ...formData, treatment_type: e.target.value })}
+                  />
+                  <label>Call-Out مكالمة صادرة</label>
                 </div>
               </div>
             </div>
@@ -261,24 +276,25 @@ export default function FormPage() {
                         type="text"
                         value={pest.pest_name}
                         onChange={(e) => updatePestDetail(index, 'pest_name', e.target.value)}
-                        style={{ border: 'none', background: 'transparent', width: '100%' }}
                       />
                     </td>
                     <td>
-                      <input
-                        type="text"
+                      <select
                         value={pest.level_of_activity}
                         onChange={(e) => updatePestDetail(index, 'level_of_activity', e.target.value)}
-                        placeholder="P, L, M, High"
-                        style={{ border: 'none', background: 'transparent', width: '100%' }}
-                      />
+                      >
+                        <option value="">اختر</option>
+                        <option value="P">P</option>
+                        <option value="L">L</option>
+                        <option value="M">M</option>
+                        <option value="High">High</option>
+                      </select>
                     </td>
                     <td>
                       <input
                         type="text"
                         value={pest.treatment_control}
                         onChange={(e) => updatePestDetail(index, 'treatment_control', e.target.value)}
-                        style={{ border: 'none', background: 'transparent', width: '100%' }}
                       />
                     </td>
                     <td>
@@ -286,7 +302,6 @@ export default function FormPage() {
                         type="text"
                         value={pest.materials_used}
                         onChange={(e) => updatePestDetail(index, 'materials_used', e.target.value)}
-                        style={{ border: 'none', background: 'transparent', width: '100%' }}
                       />
                     </td>
                     <td>
@@ -294,7 +309,6 @@ export default function FormPage() {
                         type="number"
                         value={pest.quantity}
                         onChange={(e) => updatePestDetail(index, 'quantity', parseInt(e.target.value) || 0)}
-                        style={{ border: 'none', background: 'transparent', width: '100%' }}
                       />
                     </td>
                     <td>
@@ -302,7 +316,6 @@ export default function FormPage() {
                         type="text"
                         value={pest.units}
                         onChange={(e) => updatePestDetail(index, 'units', e.target.value)}
-                        style={{ border: 'none', background: 'transparent', width: '100%' }}
                       />
                     </td>
                   </tr>
