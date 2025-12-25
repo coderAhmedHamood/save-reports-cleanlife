@@ -126,12 +126,20 @@ export default function ReportsPage() {
             <div key={report.id} className="report-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3>تقرير رقم: {report.report_no}</h3>
-                <button
-                  className="btn btn-danger btn-small"
-                  onClick={() => deleteReport(report.id)}
-                >
-                  حذف
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <Link
+                    href={`/form?id=${report.id}`}
+                    className="btn btn-success btn-small"
+                  >
+                    تعديل
+                  </Link>
+                  <button
+                    className="btn btn-danger btn-small"
+                    onClick={() => deleteReport(report.id)}
+                  >
+                    حذف
+                  </button>
+                </div>
               </div>
 
               <div className="report-info">

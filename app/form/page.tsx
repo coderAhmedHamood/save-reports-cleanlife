@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface PestDetail {
+  id?: number
   pest_name: string
   level_of_activity: string
   treatment_control: string
@@ -14,7 +15,10 @@ interface PestDetail {
 
 export default function FormPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const reportId = searchParams.get('id')
   const [loading, setLoading] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
   const [pestDetails, setPestDetails] = useState<PestDetail[]>([
     { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' },
     { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' },
@@ -49,6 +53,65 @@ export default function FormPage() {
     customer_signature: ''
   })
 
+  // جلب البيانات عند التعديل
+  useEffect(() => {
+    if (reportId) {
+      setIsEditMode(true)
+      setLoading(true)
+      fetch(`/api/reports/${reportId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data) {
+            setFormData({
+              report_no: data.report_no || '',
+              time_in: data.time_in || '',
+              date: data.date || '',
+              time_out: data.time_out || '',
+              customer_name: data.customer_name || '',
+              customer_address: data.customer_address || '',
+              job_no_contract: data.job_no_contract || '',
+              treated_areas: data.treated_areas || '',
+              treatment_type: data.treatment_type || 'Routine',
+              stock_damage: data.stock_damage || false,
+              contamination: data.contamination || false,
+              legal_action: data.legal_action || false,
+              reputation: data.reputation || false,
+              building_damage: data.building_damage || false,
+              safety_welfare: data.safety_welfare || false,
+              disease_risks: data.disease_risks || false,
+              other_risk: data.other_risk || false,
+              treatment_report: data.treatment_report || '',
+              recommended_improvements: data.recommended_improvements || '',
+              technician_name: data.technician_name || '',
+              technician_signature: data.technician_signature || '',
+              customer_signature_name: data.customer_signature_name || '',
+              customer_signature: data.customer_signature || ''
+            })
+            
+            if (data.pest_details && data.pest_details.length > 0) {
+              setPestDetails(data.pest_details.map((p: any) => ({
+                id: p.id,
+                pest_name: p.pest_name || '',
+                level_of_activity: p.level_of_activity || '',
+                treatment_control: p.treatment_control || '',
+                materials_used: p.materials_used || '',
+                quantity: p.quantity || 0,
+                units: p.units || ''
+              })))
+            } else {
+              // إذا لم تكن هناك بيانات، نضيف صف واحد فارغ
+              setPestDetails([{ pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' }])
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching report:', error)
+          alert('حدث خطأ أثناء جلب بيانات التقرير')
+        })
+        .finally(() => setLoading(false))
+    }
+  }, [reportId])
+
   const addPestRow = () => {
     setPestDetails([...pestDetails, { pest_name: '', level_of_activity: '', treatment_control: '', materials_used: '', quantity: 0, units: '' }])
   }
@@ -68,8 +131,11 @@ export default function FormPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/reports', {
-        method: 'POST',
+      const url = isEditMode ? `/api/reports/${reportId}` : '/api/reports'
+      const method = isEditMode ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -82,15 +148,15 @@ export default function FormPage() {
       const data = await response.json()
       
       if (response.ok) {
-        alert('تم إضافة التقرير بنجاح! / Report added successfully!')
+        alert(isEditMode ? 'تم تحديث التقرير بنجاح! / Report updated successfully!' : 'تم إضافة التقرير بنجاح! / Report added successfully!')
         router.push('/reports')
       } else {
         console.error('Error response:', data)
-        alert(`خطأ: ${data.message || data.error || 'فشل في إضافة التقرير'}\n${data.details ? `التفاصيل: ${data.details}` : ''}`)
+        alert(`خطأ: ${data.message || data.error || (isEditMode ? 'فشل في تحديث التقرير' : 'فشل في إضافة التقرير')}\n${data.details ? `التفاصيل: ${data.details}` : ''}`)
       }
     } catch (error: any) {
       console.error('Error:', error)
-      alert(`حدث خطأ أثناء إضافة التقرير: ${error.message || 'خطأ غير معروف'}`)
+      alert(`حدث خطأ أثناء ${isEditMode ? 'تحديث' : 'إضافة'} التقرير: ${error.message || 'خطأ غير معروف'}`)
     } finally {
       setLoading(false)
     }
@@ -542,18 +608,18 @@ export default function FormPage() {
           </div>
         </div>
 
-        <div className="actions">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'جاري الحفظ...' : 'حفظ التقرير'}
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => router.push('/')}
-          >
-            إلغاء
-          </button>
-        </div>
+          <div className="actions">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? (isEditMode ? 'جاري التحديث...' : 'جاري الحفظ...') : (isEditMode ? 'تحديث التقرير' : 'حفظ التقرير')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => router.push('/reports')}
+            >
+              إلغاء
+            </button>
+          </div>
       </form>
     </div>
   )
